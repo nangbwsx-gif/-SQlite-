@@ -7,6 +7,34 @@
 
 ---
 
+## 🚀 快速开始（本地运行）
+
+只需 4 步，无需安装数据库！
+
+```bash
+# 1. 克隆仓库
+git clone https://github.com/nangbwsx-gif/emm.git
+cd emm
+
+# 2. 安装依赖
+npm install
+
+# 3. 初始化数据库 + 导入演示账号
+npm run db:push
+npm run db:seed
+
+# 4. 启动开发服务器
+npm run dev
+```
+
+浏览器打开 **http://localhost:3000**，使用 `admin` / `admin123` 登录即可。
+
+> 💡 项目使用 **SQLite**，无需安装 PostgreSQL / MySQL 等数据库。
+> 🔑 `.env` 文件已预置随机 JWT 密钥，开箱即用。
+> 🤖 AI 聊天功能需在 `.env` 中配置 `DEEPSEEK_API_KEY`，其余功能不受影响。
+
+---
+
 ## ✨ 功能介绍
 
 ### 📚 私人书橱
@@ -106,8 +134,8 @@ Push 到 `master` 分支即自动触发：
 
 ```bash
 # 1. 克隆仓库
-git clone https://github.com/nangbwsx-gif/newbook.git
-cd newbook
+git clone https://github.com/nangbwsx-gif/emm.git
+cd emm
 
 # 2. 构建 Docker 镜像（需要传入 JWT_SECRET）
 docker build --build-arg JWT_SECRET=your-secret-key -t newbook-app:latest .
@@ -136,35 +164,38 @@ ssh root@8.222.168.107 "cd /root/newbook && \
 
 ### 方式三：本地开发
 
+> **提示：** 推荐使用顶部的「快速开始」方式，仅需 4 条命令。
+
 ```bash
-# 1. 安装依赖
+# 1. 克隆仓库
+git clone https://github.com/nangbwsx-gif/emm.git
+cd emm
+
+# 2. 安装依赖
 npm install
 
-# 2. 配置环境变量（创建 .env 文件）
-cat > .env << 'EOF'
-DATABASE_URL=postgresql://newbook:newbook_pass@localhost:5432/newbook
-JWT_SECRET=your-dev-secret-key
-DEEPSEEK_API_KEY=sk-your-key
-DEEPSEEK_BASE_URL=https://api.deepseek.com/v1
-DEEPSEEK_MODEL=deepseek-chat
-EOF
-
-# 3. 启动 PostgreSQL（Docker）
-docker run -d --name newbook-pg \
-  -e POSTGRES_USER=newbook \
-  -e POSTGRES_PASSWORD=newbook_pass \
-  -e POSTGRES_DB=newbook \
-  -p 5432:5432 \
-  postgres:16-alpine
-
-# 4. 同步数据库 + 种子数据
+# 3. 同步数据库 + 种子数据
 npm run db:push
 npm run db:seed
 
-# 5. 启动开发服务器
+# 4. 启动开发服务器
 npm run dev
 # 访问 http://localhost:3000
 ```
+
+#### 环境变量说明
+
+项目自带 `.env` 文件，默认配置如下：
+
+```
+DATABASE_URL="file:./dev.db"          # SQLite 数据库（零配置）
+JWT_SECRET="<自动生成的随机密钥>"       # JWT 签名密钥
+DEEPSEEK_API_KEY="sk-placeholder..." # DeepSeek API（可选）
+DEEPSEEK_BASE_URL="https://api.deepseek.com/v1"
+DEEPSEEK_MODEL="deepseek-chat"
+```
+
+> 除 `DEEPSEEK_API_KEY` 外所有配置均为开箱即用。AI 聊天需填入真实密钥。
 
 ---
 
