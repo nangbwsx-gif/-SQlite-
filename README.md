@@ -2,7 +2,6 @@
 
 把你的 PDF 变成可以对话的书。上传文献、分类整理，内置 AI 助手一键定位、即时问答。
 
-> 🟢 **在线体验**：https://linshupeng.asia  
 > 🧪 **演示账号**：`admin` / `admin123`
 
 ---
@@ -59,113 +58,14 @@
 
 ---
 
-## 🖥️ 服务器配置
-
-| 项目 | 配置 |
-|------|------|
-| **云服务商** | 腾讯云轻量应用服务器 |
-| **公网 IP** | `8.222.168.107` |
-| **域名** | `linshupeng.asia`（Caddy 自动 HTTPS） |
-| **CPU** | 2 核 |
-| **内存** | 2 GB |
-| **系统** | Ubuntu 22.04 |
-| **反向代理** | Caddy（自动 Let's Encrypt 证书） |
-
-### Docker 容器架构
-
-```
-┌─────────────────────────────────────────┐
-│                 Docker                   │
-│  ┌──────────┐  ┌───────┐  ┌──────────┐ │
-│  │  Caddy   │  │  App  │  │PostgreSQL│ │
-│  │  :80:443 │──│ :3000 │──│  :5432   │ │
-│  └──────────┘  └───────┘  └──────────┘ │
-│  反向代理+HTTPS  Next.js   数据库        │
-└─────────────────────────────────────────┘
-```
-
----
 
 ## 🚀 部署指南
 
-### 方式一：GitHub Actions 自动部署（推荐）
-
-Push 到 `master` 分支即自动触发：
-
-1. GitHub Actions 构建 Docker 镜像
-2. SCP 传输镜像到服务器
-3. 写入 `.env.production` 环境变量
-4. `docker compose up -d` 重启服务
-
-**前置条件：** 在 GitHub Secrets 中配置：
-- `SERVER_SSH_KEY` — 服务器 SSH 私钥
-- `JWT_SECRET` — JWT 签名密钥（≥16 字符随机字符串）
-- `DEEPSEEK_API_KEY` — DeepSeek API 密钥
-
-### 方式二：手动部署
-
-```bash
-# 1. 克隆仓库
-git clone https://github.com/nangbwsx-gif/newbook.git
-cd newbook
-
-# 2. 构建 Docker 镜像（需要传入 JWT_SECRET）
-docker build --build-arg JWT_SECRET=your-secret-key -t newbook-app:latest .
-
-# 3. 导出镜像
-docker save newbook-app:latest | gzip > newbook-app.tar.gz
-
-# 4. 传输到服务器
-scp newbook-app.tar.gz docker-compose.deploy.yml Caddyfile root@8.222.168.107:/root/newbook/
-
-# 5. 在服务器上创建 .env.production
-ssh root@8.222.168.107 "cat > /root/newbook/.env.production << 'EOF'
-DATABASE_URL=postgresql://newbook:newbook_pass@postgres:5432/newbook?schema=public
-JWT_SECRET=your-secret-key
-DEEPSEEK_API_KEY=sk-your-deepseek-key
-DEEPSEEK_BASE_URL=https://api.deepseek.com/v1
-DEEPSEEK_MODEL=deepseek-chat
-EOF"
-
-# 6. 加载镜像并启动
-ssh root@8.222.168.107 "cd /root/newbook && \
-  docker load < newbook-app.tar.gz && \
-  rm -f newbook-app.tar.gz && \
-  docker compose up -d"
-```
-
-### 方式三：本地开发
-
-```bash
-# 1. 安装依赖
 npm install
-
-# 2. 配置环境变量（创建 .env 文件）
-cat > .env << 'EOF'
-DATABASE_URL=postgresql://newbook:newbook_pass@localhost:5432/newbook
-JWT_SECRET=your-dev-secret-key
-DEEPSEEK_API_KEY=sk-your-key
-DEEPSEEK_BASE_URL=https://api.deepseek.com/v1
-DEEPSEEK_MODEL=deepseek-chat
-EOF
-
-# 3. 启动 PostgreSQL（Docker）
-docker run -d --name newbook-pg \
-  -e POSTGRES_USER=newbook \
-  -e POSTGRES_PASSWORD=newbook_pass \
-  -e POSTGRES_DB=newbook \
-  -p 5432:5432 \
-  postgres:16-alpine
-
-# 4. 同步数据库 + 种子数据
 npm run db:push
 npm run db:seed
-
-# 5. 启动开发服务器
 npm run dev
 # 访问 http://localhost:3000
-```
-
 ---
 
 ## 📁 项目结构
